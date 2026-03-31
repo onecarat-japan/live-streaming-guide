@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>ライブ配信ガイド | ONECARAT</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .phone-container {
+            height: 100vh;
+            height: 100dvh; 
+            position: relative;
+            background-color: #fff;
+        }
+
+        /* --- アニメーション定義 --- */
+        @keyframes title-reveal {
+            0% { transform: translateY(20px); opacity: 0; filter: blur(10px); }
+            100% { transform: translateY(0); opacity: 1; filter: blur(0); }
+        }
+        .animate-title-reveal {
+            animation: title-reveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            opacity: 0;
+        }
+
+        /* --- バウンスアニメーションの追加 --- */
+        @keyframes bounce-in {
+            0% { transform: translateY(-50px) scale(0.3); opacity: 0; }
+            50% { transform: translateY(10px) scale(1.1); opacity: 1; }
+            70% { transform: translateY(-5px) scale(0.98); }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        .animate-bounce-in {
+            animation: bounce-in 1.2s cubic-bezier(0.36, 0.45, 0.63, 1) forwards;
+            opacity: 0;
+            will-change: transform, opacity; /* パフォーマンス向上のため */
+        }
+
+        @keyframes bounce-in {
+            0% { transform: translateY(-50px) scale(0.3); opacity: 0; }
+            50% { transform: translateY(10px) scale(1.1); opacity: 1; }
+            70% { transform: translateY(-5px) scale(0.98); }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        .animate-bounce-in {
+            animation: bounce-in 1.2s cubic-bezier(0.36, 0.45, 0.63, 1) forwards;
+            opacity: 0;
+        }
+
+        @keyframes soft-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.04); }
+        }
+        .animate-soft-pulse {
+            animation: soft-pulse 3s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        @keyframes float-heart {
+            0% { transform: translateY(0) scale(0.2) rotate(0deg); opacity: 0; }
+            15% { transform: translateY(-20px) scale(1) rotate(calc(var(--tilt) * 0.2)); opacity: 1; }
+            80% { opacity: 0.8; }
+            100% { transform: translateY(-320px) scale(1) rotate(var(--tilt)); opacity: 0; }
+        }
+        .animate-heart {
+            animation-name: float-heart;
+            animation-timing-function: cubic-bezier(0.4, 0, 1, 1);
+            animation-fill-mode: forwards;
+        }
+
+        @keyframes comment-in {
+            0% { transform: translateY(15px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        .animate-comment-in {
+            animation: comment-in 0.4s ease-out forwards;
+        }
+
+        @keyframes tap-attention {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 15px rgba(255,255,255,0.3); }
+            50% { transform: scale(1.03); box-shadow: 0 0 25px rgba(255,255,255,0.5); }
+        }
+        .animate-tap-attention {
+            animation: tap-attention 1.5s infinite ease-in-out;
+        }
+
+        @keyframes slide-up {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-slide-up {
+            animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* シマー効果（光るアニメーション）の追加 */
+        @keyframes shimmer {
+            0% { transform: translateX(-150%) skewX(-20deg); }
+            100% { transform: translateX(250%) skewX(-20deg); }
+        }
+        .animate-shimmer {
+            animation: shimmer 2.5s infinite ease-in-out;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+        
+        .page-transition {
+            animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .sticky-banner-active {
+            animation: banner-pulse 2s infinite ease-in-out;
+        }
+        @keyframes banner-pulse {
+            0% { transform: scale(1); box-shadow: 0 10px 25px -5px rgba(6, 199, 85, 0.4); }
+            50% { transform: scale(1.02); box-shadow: 0 15px 30px -5px rgba(6, 199, 85, 0.6); }
+            100% { transform: scale(1); box-shadow: 0 10px 25px -5px rgba(6, 199, 85, 0.4); }
+        }
+
+        .progress-container {
+            position: absolute;
+            top: 16px;
+            left: 50px;
+            right: 50px;
+            display: flex;
+            gap: 4px;
+            z-index: 50;
+        }
+        .progress-bar {
+            height: 1.5px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 99px;
+            flex: 1;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: rgba(255,255,255,0.6);
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const LINE_URL = "https://lin.ee/U4NCFuX";
+
+        // --- データ定義 ---
+        const USERS = ["rina_08", "m_chan", "yuki_22", "ken_ken", "misa_misa", "night_sky", "takaaki_sea", "daiki", "sora", "nana_77", "michel", "kenta_33"];
+        const TEXTS = ["ライバー事務所探してました！ ✨", "憧れる！配信したい！ 😍", "ONCARATすごそう 💎", "夢があるなぁ… 🌈", "ライバー募集してるの？ 🤔", "初心者だけど大丈夫かな？ 🔰", "稼ぎたい！ 💰", "ライブ配信について知りたい！ 📱", "どんな世界なんだろ？ ✨", "人気になれるかな… 😖"];
+        const COMMENT_COLORS = ["text-rose-500", "text-amber-500", "text-sky-500", "text-emerald-500", "text-orange-500", "text-purple-500", "text-pink-500"];
+        const HEART_COLORS = ["text-rose-400", "text-pink-400", "text-red-400", "text-orange-400", "text-yellow-400", "text-purple-400", "text-sky-400", "text-emerald-400"];
+
+        const OnecaratFallbackLogo = ({ size = 20 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 3L3 8L12 22L21 8L18 3H6Z" fill="#7ed7d1" />
+                <path d="M6 3L12 8L18 3M3 8L12 8L21 8M12 22L9 8M12 22L15 8" stroke="white" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+        );
+
+        const Icon = ({ name, color = "currentColor", size = 24, fill = "none", className = "" }) => {
+            const icons = {
+                Smartphone: <path d="M17 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2ZM12 18h.01"/>,
+                MessageCircle: <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>,
+                UserCircle: <><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"/></>,
+                TrendingUp: <><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></>,
+                Heart: <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>,
+                ChevronRight: <polyline points="9 18 15 12 9 6"/>,
+                ChevronLeft: <polyline points="15 18 9 12 15 6"/>,
+                Camera: <><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></>,
+                Ghost: <path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8Z"/>,
+                Globe: <><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></>,
+                Gift: <><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></>,
+                Percent: <><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/><line x1="19" y1="5" x2="5" y2="19"/></>,
+                Clock: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>,
+                Trophy: <><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-2.34"/><path d="M12 2v12.66"/></>,
+                Medal: <><path d="M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15"/><circle cx="12" cy="15" r="7"/><circle cx="12" cy="15" r="3"/><path d="M12 18v-6"/><path d="M10 13h1"/></>,
+                Star: <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>,
+                Zap: <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>,
+                AlertCircle: <><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></>
+            };
+            return (
+                <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                    {icons[name]}
+                </svg>
+            );
+        };
+
+        const App = () => {
+            const [currentPage, setCurrentPage] = useState(0);
+            const [comments, setComments] = useState([]);
+            const [hearts, setHearts] = useState([]);
+            const [imgError, setImgError] = useState(false);
+            const [showFinalPopup, setShowFinalPopup] = useState(false);
+            // ポップアップを一度閉じたことを示すフラグ
+            const [popupDismissed, setPopupDismissed] = useState(false);
+            
+            const nextTextIndex = useRef(0);
+            const scrollContainerRef = useRef(null); 
+            const triggerRef = useRef(null);
+            const videoRef = useRef(null);
+
+            useEffect(() => {
+                if (scrollContainerRef.current) {
+                    scrollContainerRef.current.scrollTop = 0;
+                }
+                setShowFinalPopup(false);
+                setPopupDismissed(false); // ページ切り替え時にフラグをリセット
+
+                // 表紙（0ページ目）に切り替わった時、動画を再生する処理を追加
+                if (currentPage === 0 && videoRef.current) {
+                    videoRef.current.play().catch(e => console.log("再生ブロック対策"));
+                }
+            }, [currentPage]);
+
+            // 15秒経過タイマー (最初の表示用)
+            useEffect(() => {
+                let timer;
+                if (currentPage === 6 && !showFinalPopup && !popupDismissed) {
+                    timer = setTimeout(() => {
+                        setShowFinalPopup(true);
+                    }, 15000);
+                }
+                return () => clearTimeout(timer);
+            }, [currentPage, showFinalPopup, popupDismissed]);
+
+            // スクロール監視
+            const handleScroll = () => {
+                if (currentPage !== 6 || !scrollContainerRef.current) return;
+                
+                const container = scrollContainerRef.current;
+                const scrollPosition = container.scrollTop + container.clientHeight;
+                const totalHeight = container.scrollHeight;
+                
+                // 「一番下」に到達したか判定
+                const isBottom = totalHeight - scrollPosition <= 10; // 誤差を考慮して10px
+                 
+                // --- 追加：一番下から少し上にスクロール戻したら「閉じた記録」をリセット ---
+                if (!isBottom) {
+                    setPopupDismissed(false);
+                }
+                
+                // ポップアップを表示する条件
+                // 1. 一番下である 2. 現在表示されていない 3. まだDismiss（拒否）状態でない
+                if (isBottom && !showFinalPopup && !popupDismissed) {
+                    setShowFinalPopup(true);
+                }
+            };
+
+            const generateNextComment = (currentComments) => {
+                const text = TEXTS[nextTextIndex.current];
+                nextTextIndex.current = (nextTextIndex.current + 1) % TEXTS.length;
+                const activeUserNames = currentComments.map(c => c.user);
+                const availableUsers = USERS.filter(u => !activeUserNames.includes(u));
+                const selectedUser = availableUsers.length > 0 ? availableUsers[Math.floor(Math.random() * availableUsers.length)] : USERS[Math.floor(Math.random() * USERS.length)];
+                return { user: selectedUser, text, color: COMMENT_COLORS[Math.floor(Math.random() * COMMENT_COLORS.length)], id: Math.random() };
+            };
+
+            const generateHeart = () => ({
+                id: Math.random(),
+                x: Math.random() * 30 - 15,
+                tilt: Math.random() * 80 - 40,
+                color: HEART_COLORS[Math.floor(Math.random() * HEART_COLORS.length)],
+                delay: Math.random() * 0.1,
+                duration: 2.2 + Math.random() * 1.5 
+            });
+
+            useEffect(() => {
+                let initial = [];
+                for(let i=0; i<4; i++) initial.push(generateNextComment(initial));
+                setComments(initial);
+            }, []);
+
+            useEffect(() => {
+                if (currentPage !== 0) return;
+                const commentTimer = setInterval(() => {
+                    setComments(prev => [...prev.slice(1), generateNextComment(prev)]);
+                }, 800);
+                const heartTimer = setInterval(() => {
+                    const heartCount = Math.floor(Math.random() * 3) + 1;
+                    const newHearts = Array.from({ length: heartCount }).map(() => generateHeart());
+                    setHearts(prev => [...prev.slice(-50), ...newHearts]); 
+                }, 250);
+                return () => { clearInterval(commentTimer); clearInterval(heartTimer); };
+            }, [currentPage]);
+
+            const pages = [
+                // Page 0: 表紙
+          // Page 0: 表紙
+        {
+            isCover: true,
+            color: "from-pink-200 via-white to-sky-200",
+            content: (
+                <div className="h-full w-full relative flex flex-col pt-4 pb-4 px-4 overflow-hidden text-gray-800 text-left">
+                    {/* ヘッダーの余白を少し縮小 */}
+                    <div className="flex justify-between items-start z-30 shrink-0 mt-2 text-left">
+                        <div className="flex items-center gap-2 bg-white/40 backdrop-blur-md p-1 rounded-full border border-white/60">
+                            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm overflow-hidden shrink-0 text-left">
+                                {!imgError ? (
+                                    <img src="onecarat_logo.png" alt="ONECARAT Logo" className="w-full h-full object-contain p-1" onError={() => setImgError(true)} />
+                                ) : (
+                                    <OnecaratFallbackLogo size={20} />
+                                )}
+                            </div>
+                            <div className="pr-4 text-left">
+                                <p className="text-gray-800 text-[10px] font-bold leading-none mb-1 text-left">ONECARAT</p>
+                                <p className="text-gray-500 text-[7px] font-bold leading-none tracking-tighter italic">12,000+ Members</p>
+                            </div>
+                            <div className="bg-rose-400 px-4 py-2 rounded-full text-white text-[8px] font-bold shadow-lg shrink-0">Follow</div>
+                        </div>
+                    </div>
+
+                    {/* 背景動画 */}
+                    <div className="absolute inset-0 z-10 opacity-70 pointer-events-none scale-110">
+                        <video 
+                        ref={videoRef}
+                        src="ONCARAT-Liver-movie.mp4" 
+                        autoPlay
+                        loop
+                        playsInline
+                        muted
+                        className="w-full h-full object-cover scale-105"
+                        />
+                    </div>
+
+                    {/* 中央ロゴ：高さを mt-12 に抑え、サイズを w-[85%] に微調整して縦方向のスペースを確保 */}
+                    <div className="flex-1 flex flex-col items-center justify-start z-20 px-4 text-center mt-20">
+                        <img 
+                            src="ライブ配信ガイド.png" 
+                            alt="ライブ配信ガイド ロゴ" 
+                            className="w-[95%] max-w-[360px] h-auto object-contain animate-bounce-in" 
+                            style={{ animationDelay: '0.1s' }}
+                        />
+                    </div>
+
+                    {/* 下部コンテンツエリア */}
+                    <div className="z-30 mt-auto flex flex-col space-y-3 text-left">
+                        <div className="flex items-end justify-between pointer-events-none text-left">
+                            {/* コメント欄の最小高さを 140px -> 120px に縮小 */}
+                            <div className="flex flex-col gap-2 min-h-[120px] justify-end flex-1 text-left">
+                                {comments.map((comment) => (
+                                    <div key={comment.id} className="bg-white/90 backdrop-blur-md px-3 py-2 rounded-full border border-bg-white/90 shadow-sm animate-comment-in self-start max-w-[85%] text-left">
+                                        <p className="text-gray-800 text-[11px] font-medium leading-none">
+                                            <span className={`${comment.color} font-bold mr-1.5`}>{comment.user}</span>{comment.text}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="relative w-12 h-32 shrink-0 overflow-visible text-left">
+                                {hearts.map((heart) => (
+                                    <div key={heart.id} className={`absolute bottom-0 left-[30%] ${heart.color} animate-heart`} style={{ marginLeft: `${heart.x}px`, animationDelay: `${heart.delay}s`, animationDuration: `${heart.duration}s`, '--tilt': `${heart.tilt}deg` }}>
+                                        <Icon name="Heart" size={28} fill="currentColor" />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* ボタン：高さを確保するために上下の余白(py)を微調整 */}
+                        <div className="text-center w-full pb-2">
+                            <div className="animate-tap-attention inline-block p-[2px] rounded-full bg-gradient-to-r from-blue-500 to-purple-600 shadow-2xl">
+                                <div className="bg-white rounded-full">
+                                    <div className="px-8 py-3 text-center">
+                                        <p className="font-bold text-[11px] sm:text-sm tracking-[0.2em] uppercase bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+                                            TAP TO NEXT PAGE
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="text-center w-full pt-0"><p className="text-gray-400 text-[9px] font-bold tracking-[0.1em] pl-[0.4em] text-center">Produce by ONECARAT</p></div>
+                    </div>
+                </div>
+            )
+        },
+
+                // Page 1: ライブ配信って何？
+                { 
+                    title: "ライブ配信って何？", 
+                    subtitle: "視聴者と「今」を共有するエンターテインメント！", 
+                    color: "from-pink-500 to-rose-400", 
+                    content: (
+                        <div className="space-y-6 page-transition pb-8 text-left">
+                            <div className="px-2 text-left">
+                                <p className="text-gray-700 text-[13px] font-medium leading-relaxed text-justify text-left">「ライブ配信」という言葉、InstagramやTikTok, YouTubeなどで一度は見聞きしたことがあるはず。でも、「実際にどういったことをやるのか、自分に何ができるかまではイメージがわかない」という方も多いのではないでしょうか。</p>
+                                <p className="text-gray-900 text-[13px] font-bold mt-4 leading-relaxed border-l-4 border-pink-400 pl-3 text-left">そんな方のために、<br />ライブ配信について分かりやすく解説します！</p>
+                            </div>
+                            <div className="space-y-4 text-left">
+                                <h3 className="text-xs font-bold text-gray-400 tracking-widest uppercase pl-2 text-left">主な特徴</h3>
+                                <div className="flex flex-col p-5 bg-white rounded-xl border border-gray-100 shadow-sm mb-4 text-left">
+                                    <div className="flex items-center gap-3 mb-2 text-left">
+                                        <div className="shrink-0 text-left "><Icon name="Smartphone" color="#f43f5e" size={28} /></div>
+                                        <h4 className="font-bold text-sm text-gray-800 leading-none flex-1 text-left">「スマホ1台」で主役になれる！</h4>
+                                    </div>
+                                    <p className="text-[11px] text-gray-500 leading-relaxed pl-1 text-justify text-left">特別な機材や編集スキルは不要. スマホ1台あれば、自分の部屋やお出かけ先で気軽に世界へ発信することができます。編集された動画ではなく「今、この瞬間」をリアルタイムで届けられるのが最大の魅力です。</p>
+                                </div>
+                                <div className="flex flex-col p-5 bg-white rounded-xl border border-gray-100 shadow-sm mb-4 text-left">
+                                    <div className="flex items-center gap-3 mb-2 text-left">
+                                        <div className="shrink-0 text-left"><Icon name="MessageCircle" color="#3b82f6" size={28} /></div>
+                                        <h4 className="font-bold text-sm text-gray-800 leading-none flex-1 text-left">視聴者と「会話」ができる！</h4>
+                                    </div>
+                                    <p className="text-[11px] text-gray-500 leading-relaxed pl-1 text-justify text-left">視聴者が送るコメントにその場で反応し、まるで友人のように会話を楽しむことができます。物理的な距離を超えて世界中の人と深く交流できるため、特別な才能がなくても、あなたの飾らない人柄に惹かれるファンが必ず見つかります。</p>
+                                </div>
+                                <div className="flex flex-col p-5 bg-white rounded-xl border border-gray-100 shadow-sm mb-4 text-left">
+                                    <div className="flex items-center gap-3 mb-2 text-left">
+                                        <div className="shrink-0 text-left"><Icon name="Globe" color="#a855f7" size={28} /></div>
+                                        <h4 className="font-bold text-sm text-gray-800 leading-none flex-1 text-left">発信が収入に変わる、新しい働き方</h4>
+                                    </div>
+                                    <p className="text-[11px] text-gray-500 leading-relaxed pl-1 text-justify text-left">ライブ配信は今や単なる趣味を超え、新しい「職業」や「ライフスタイル」として定着しています。学生のアルバイト代わりや、子育て中の在宅ワーク、仕事終わりの副業など、それぞれの生活に合わせて「自己表現」を楽しみながら収入を得る文化として親しまれています。</p>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+                // Page 2: なぜ稼げる？
+                { 
+                    title: "なぜ稼げる？", 
+                    subtitle: "頑張りが収益に直結するやりがいシステム！", 
+                    color: "from-emerald-500 to-teal-400", 
+                    content: (
+                        <div className="space-y-6 page-transition pb-0. -mb-4 text-left">
+                            <div className="bg-emerald-50/70 p-6 rounded-xl border border-emerald-100 shadow-md text-left">
+                                <h4 className="font-bold text-emerald-800 text-sm mb-3 leading-snug flex items-start gap-2 text-left">
+                                    <Icon name="TrendingUp" color="#059669" size={20} className="mt-1 shrink-0" />
+                                    <span>未経験から月収100万円も。<br />1,000億円市場で掴む新しい成功</span>
+                                </h4>
+                                <p className="text-gray-700 text-[12px] leading-relaxed text-justify text-left">
+                                    ライブ配信は、コロナ禍でおうち時間が増えたことをきっかけに一気に広まりました。今では日本中で数十万人もの配信者が活動する、1,000億円以上の巨大市場へと急成長しています。特別なスキルがない未経験の方にも大きなチャンスがあり、短期間で会社員以上の収入を得る人も少なくありません。
+                                </p>
+                            </div>
+
+                            <div className="px-2 text-left">
+                                <div className="mb-10 text-left">
+                                    <h4 className="font-bold text-gray-800 text-[15px] mb-3 flex items-center gap-2 text-left">
+                                        <Icon name="Gift" color="#10b981" size={22} />
+                                        収益の基本は「ギフト（投げ銭）」
+                                    </h4>
+
+                                    <div className="mt-4 mb-4 rounded-xl overflow-hidden shadow-md">
+                                        <img 
+                                            src="gift.png" 
+                                            alt="ギフト（投げ銭）の仕組み" 
+                                            className="w-full h-auto object-cover" 
+                                        />
+                                    </div>
+
+                                    <div className="text-[12px] text-gray-700 leading-relaxed space-y-3 pl-1 text-justify text-left">
+                                        <p>ライブ配信は、スマホさえあれば誰でも無料で始めることができます。配信を見たリスナー（視聴者）は、コメントでのコミュニケーションに加えて、「ギフト（アイテム）」と呼ばれるデジタルギフトをライバーにプレゼントすることができます。</p>
+                                        <p>これは「この配信者を応援したい！」というリスナーの純粋な気持ちが形になったもの. 10円程度の気軽なものから、画面いっぱいに広がる数万円の豪華な演出まで、種類は多種多様です。この贈られたギフトの売上の一部が、ライバーの活動を支える大切な報酬となります。</p>
+                                    </div>
+                                </div>
+
+                                <div className="mb-10 text-left">
+                                    <h4 className="font-bold text-gray-800 text-[15px] mb-3 flex items-center gap-2 text-left">
+                                        <Icon name="Percent" color="#10b981" size={22} />
+                                        手元にいくら入る？重要な「還元率」
+                                    </h4>
+
+                                    <div className="mt-4 mb-4 overflow-hidden">
+                                        <img 
+                                            src="還元率.png" 
+                                            alt="ギフト（投げ銭）の還元率" 
+                                            className="w-full h-auto object-cover" 
+                                        />
+                                    </div>
+
+                                    <div className="text-[12px] text-gray-700 leading-relaxed space-y-3 pl-1 mb-4 text-justify text-left">
+                                        <p>贈られたギフトの金額のうち、実際にライバーが受け取れる報酬の割合を「還元率（かんげんりつ）」と呼びます。この還元率はアプリごとに設定が異なりますが、一般的にはおおよそ30％前後といわれています。当然、この割合が高いアプリほど、同じギフト量でもより効率よく収益を得ることができます。</p>
+                                    </div>
+                                    <div className="border-2 border-dashed border-emerald-400 p-5 rounded-xl relative overflow-hidden transition-all duration-300 text-left">
+                                        <p className="text-[11px] leading-relaxed text-gray-700 text-justify text-left">
+                                            ※具体的な還元率は各アプリ非公表のケースが多いですが、ONECARATのようなライバー事務所に所属することで、個人（フリー）で活動するよりも有利な条件や還元率が適用されることもあります。
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="pt-4 pb-12 text-center text-left">
+                                    <div className="py-6 text-center">
+                                        <h3 className="text-base font-bold text-gray-900 mb-2 tracking-tight animate-soft-pulse text-center">
+                                            ギフトだけじゃない！<br />多様な報酬システム
+                                        </h3>
+                                        <p className="text-[11px] text-gray-500 font-medium leading-relaxed px-4 text-center text-justify text-left">
+                                            ライブ配信アプリによっては、ギフト以外にもライバーの頑張りを評価する様々な報酬システムが用意されています。
+                                        </p>
+                                    </div>
+                                    
+                                    <div className="space-y-6 text-left">
+                                        <div className="p-5 bg-white rounded-xl border border-gray-100 shadow-sm text-left hover:shadow-md transition-shadow">
+                                            <div className="flex items-center gap-2 mb-2.5 text-left">
+                                                <Icon name="Clock" color="#f97316" size={22} />
+                                                <h5 className="font-bold text-[13px] text-gray-800 leading-tight text-left">① ランク報酬（時給制度）</h5>
+                                            </div>
+
+                                            <div className="mt-4 mb-4 overflow-hidden shadow-md">
+                                                <img 
+                                                    src="rank.png" 
+                                                    alt="ランク報酬" 
+                                                    className="w-full h-auto object-cover" 
+                                                />
+                                            </div>
+
+                                            <p className="text-[11px] text-gray-500 leading-relaxed text-justify pl-1 text-left">
+                                                Pococha（ポコチャ）などのアプリでは、人気や配信実績を表す「ランク」が存在します。このランクに応じて「1時間あたり〇〇円」といった時給のような報酬が発生するため、視聴者が少ない時間帯でも安定した収入を確保できるのが大きな強みです。
+                                            </p>
+                                        </div>
+
+                                        <div className="p-5 bg-white rounded-xl border border-gray-100 shadow-sm text-left hover:shadow-md transition-shadow">
+                                            <div className="flex items-center gap-2 mb-2.5 text-left">
+                                                <Icon name="Medal" color="#eab308" size={22} />
+                                                <h5 className="font-bold text-[13px] text-gray-800 leading-tight text-left">② イベントプライズ（入賞特典）</h5>
+                                            </div>
+
+                                            <div className="mt-4 mb-4 overflow-hidden shadow-md">
+                                                <img 
+                                                    src="event_prize.png" 
+                                                    alt="イベントプライズ" 
+                                                    className="w-full h-auto object-cover" 
+                                                />
+                                            </div>
+                                            <p className="text-[11px] text-gray-500 leading-relaxed text-justify pl-1 text-left">
+                                                アプリ内で定期的に開催されるイベントで入賞すると、賞金や特別ボーナスを獲得できる場合があります。また、「広告出演」や「雑誌掲載」といった特典を得ることでメディア出演の機会が増え、人気アップとともに結果的に大きな収益アップへと繋がるチャンスになります。
+                                            </p>
+                                        </div>
+
+                                        <div className="p-5 bg-white rounded-xl border border-gray-100 shadow-sm text-left hover:shadow-md transition-shadow">
+                                            <div className="flex items-center gap-2 mb-2.5 text-left">
+                                                <Icon name="Star" color="#6366f1" size={22} />
+                                                <h5 className="font-bold text-[13px] text-gray-800 leading-tight text-left">③ サブスク収益（ファンクラブ機能）</h5>
+                                            </div>
+
+                                            <div className="mt-4 mb-4 overflow-hidden shadow-md">
+                                                <img 
+                                                    src="subscription.png" 
+                                                    alt="サブスクリプション収益" 
+                                                    className="w-full h-auto object-cover" 
+                                                />
+                                            </div>
+
+                                            <p className="text-[11px] text-gray-500 leading-relaxed text-justify pl-1 text-justify text-left">
+                                                TikTokや17LIVEなどの一部アプリでは、配信者が独自のサブスクリプション（月額制のファンクラブのようなもの）を開設できます。加入してくれたリスナーに限定配信や特別な特典を提供することで、加入者数に応じた継続的で安定した収益を受け取ることができます。
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+                // Page 3: アプリの種類
+                { 
+                    title: "どんな種類がある？", 
+                    subtitle: "自分の生活スタイルや目的に合わせて選ぼう！", 
+                    color: "from-blue-500 to-cyan-400", 
+                    content: (
+                        <div className="space-y-8 page-transition pb-8 text-left">
+                            <div className="px-2 text-left">
+                                <p className="text-gray-700 text-[13px] font-medium leading-relaxed text-justify text-left">
+                                    現在、ライブ配信アプリは多種多様なものがありますが、大きく分けると「顔出しをするもの」と、「顔出しをしないもの」の2つに分けられます。
+                                </p>
+                            </div>
+
+                            <div className="space-y-4 text-left">
+                                <div className="bg-white p-6 rounded-xl shadow-md border border-pink-500 text-left">
+                                    <div className="flex items-center gap-2 mb-3 text-left">
+                                        <Icon name="UserCircle" color="#ec4899" size={24} />
+                                        <h4 className="font-bold text-sm text-pink-500 text-left">顔出しアプリ</h4>
+                                    </div>
+                                    <p className="text-[11px] text-gray-400 font-bold mb-3 text-left">Pococha, 17LIVE, TikTok, BIGO LIVE, ミクチャなど</p>
+                                    
+                                    <div className="mb-4 rounded-xl overflow-hidden shadow-sm text-left">
+                                        <img src="face_cam_app.jpg" alt="顔出しアプリ配信イメージ" className="w-full h-auto object-cover" />
+                                    </div>
+
+                                    <p className="text-[12px] text-gray-600 leading-relaxed text-justify text-left">
+                                        配信者が画面に向かって話す姿をリスナーに届け、直接コミュニケーションを取ることができます。表情が伝わりやすいため、より深い関係を築けるのがメリット. また、雑誌掲載やランウェイ出演などのリアルイベントも多く、芸能活動やインフルエンサーを目指す方に最適です。
+                                    </p>
+                                </div>
+
+                                <div className="bg-white p-6 rounded-xl shadow-md border border-indigo-500 text-left">
+                                    <div className="flex items-center gap-2 mb-3 text-left">
+                                        <Icon name="Ghost" color="#6366f1" size={24} />
+                                        <h4 className="font-bold text-sm text-indigo-500 text-left">顔出しをしないアプリ</h4>
+                                    </div>
+                                    <p className="text-[11px] text-gray-400 font-bold mb-3 text-left">IRIAM, REALITY, Mirrativ, Spoon など</p>
+                                    
+                                    <div className="mb-4 flex justify-center items-center text-left">
+                                        <img 
+                                            src="no_face_cam_app.jpg" 
+                                            alt="非顔出しアプリ配信イメージ" 
+                                            className="block h-[200px] w-auto object-contain"
+                                        />
+                                    </div>
+
+                                    <p className="text-[12px] text-gray-600 leading-relaxed text-justify text-left">
+                                        バーチャルアバターの姿になりきって配信をしたり、声だけ配信したりするスタイル。リアルの自分とは異なるキャラクターになりきって配信をしたい方に向いています。イベントとしては、広告掲載やオリジナル楽曲提供などが多く、Web上でのメディア露出などの機会を増やしたい方に最適です。
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="px-2 text-left">
+                                <h3 className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-6 border-b border-gray-100 pb-2 text-left">代表的なアプリをチェック！</h3>
+                                
+                                <div className="space-y-6 text-left">
+                                    <h4 className="font-bold text-sm text-pink-500 mb-2">リアルな魅力で勝負！「顔出しアプリ」</h4>
+
+                                    <div className="flex gap-4 items-start text-left">
+                                        <img src="Pococha.png" alt="Pocochaアイコン" className="w-12 h-12 rounded-xl object-cover shrink-0 border border-gray-100 shadow-sm bg-white" />
+                                        <div className="text-left">
+                                            <h5 className="font-bold text-[14px] text-gray-800 mb-1 text-left">Pococha（ポコチャ）</h5>
+                                            <div className="space-y-2 text-left">
+                                                <p className="text-[11px] text-gray-600 leading-relaxed text-justify text-left"><span className="bg-pink-100 text-pink-600 text-[10px] px-1.5 py-0.5 rounded font-bold mr-1.5 whitespace-nowrap text-left">特徴</span>日本発のアプリ。「時間ダイヤ（時給のような報酬）」制度があり、初心者でも最も収入を安定させやすいのが魅力です。</p>
+                                                <p className="text-[11px] text-gray-600 leading-relaxed text-justify text-left"><span className="bg-pink-100 text-pink-600 text-[10px] px-1.5 py-0.5 rounded font-bold mr-1.5 whitespace-nowrap text-left">こんな人におすすめ</span>じっくりファンと仲を深めたい人、コツコツと安定して稼ぎたい人。</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-4 items-start text-left">
+                                        <img src="17LIVE.png" alt="17LIVEアイコン" className="w-12 h-12 rounded-xl object-cover shrink-0 border border-gray-100 shadow-sm bg-white" />
+                                        <div className="text-left">
+                                            <h5 className="font-bold text-[14px] text-gray-800 mb-1 text-left">17LIVE（ワンセブンライブ）</h5>
+                                            <div className="space-y-2 text-left">
+                                                <p className="text-[11px] text-gray-600 leading-relaxed text-justify text-left"><span className="bg-red-100 text-red-600 text-[10px] px-1.5 py-0.5 rounded font-bold mr-1.5 whitespace-nowrap text-left">特徴</span>ライブ配信の王道アプリ。歴史が長く、様々なイベントが頻繁に開催されており、トップ層の収益額が非常に大きいのが特徴です。</p>
+                                                <p className="text-[11px] text-gray-600 leading-relaxed text-justify text-left"><span className="bg-red-100 text-red-600 text-[10px] px-1.5 py-0.5 rounded font-bold mr-1.5 whitespace-nowrap text-left">こんな人におすすめ</span>歌やパフォーマンスを披露したい人、メディア出演のチャンスを掴みたい人。</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-4 items-start text-left">
+                                        <img src="TikTok.png" alt="TikTok LIVEアイコン" className="w-12 h-12 rounded-xl object-cover shrink-0 border border-gray-100 shadow-sm bg-white" />
+                                        <div className="text-left">
+                                            <h5 className="font-bold text-[14px] text-gray-800 mb-1 text-left">TikTok LIVE（ティックトックライブ）</h5>
+                                            <div className="space-y-2 text-left">
+                                                <p className="text-[11px] text-gray-600 leading-relaxed text-justify text-left"><span className="bg-cyan-100 text-cyan-600 text-[10px] px-1.5 py-0.5 rounded font-bold mr-1.5 whitespace-nowrap text-left">特徴</span>今最も勢いのあるプラットフォーム。 ショート動画からの流入も狙えるため、多くのリスナー流入が狙えます。</p>
+                                                <p className="text-[11px] text-gray-600 leading-relaxed text-justify text-left"><span className="bg-cyan-100 text-cyan-600 text-[10px] px-1.5 py-0.5 rounded font-bold mr-1.5 whitespace-nowrap text-left">こんな人におすすめ</span>インフルエンサーを目指している人、一気に知名度や収益を爆発させたい人。</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-4 items-start text-left">
+                                        <img src="BIGO LIVE.png" alt="BIGO LIVEアイコン" className="w-12 h-12 rounded-xl object-cover shrink-0 border border-gray-100 shadow-sm bg-white" />
+                                        <div text-left>
+                                            <h5 className="font-bold text-[14px] text-gray-800 mb-1 text-left">BIGO LIVE（ビゴライブ）</h5>
+                                            <div className="space-y-2 text-left">
+                                                <p className="text-[11px] text-gray-600 leading-relaxed text-justify text-left"><span className="bg-blue-100 text-blue-600 text-[10px] px-1.5 py-0.5 rounded font-bold mr-1.5 whitespace-nowrap text-left">特徴</span>全世界で数億人のユーザーを誇るグローバルアプリ。海外のリスナーが多く、グローバルな交流やイベントが盛んです。</p>
+                                                <p className="text-[11px] text-gray-600 leading-relaxed text-justify text-left"><span className="bg-blue-100 text-blue-600 text-[10px] px-1.5 py-0.5 rounded font-bold mr-1.5 whitespace-nowrap text-left">こんな人におすすめ</span>世界中の人と繋がりたい人、語学力を活かしたい人、海外志向が強い人。</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-4 items-start text-left">
+                                        <img src="ミクチャ.png" alt="ミクチャアイコン" className="w-12 h-12 rounded-xl object-cover shrink-0 border border-gray-100 shadow-sm bg-white" />
+                                        <div className="text-left">
+                                            <h5 className="font-bold text-[14px] text-gray-800 mb-1 text-left">MIXCHANNEL（ミクチャ）</h5>
+                                            <div className="space-y-2 text-left">
+                                                <p className="text-[11px] text-gray-600 leading-relaxed text-justify text-left"><span className="bg-amber-100 text-amber-600 text-[10px] px-1.5 py-0.5 rounded font-bold mr-1.5 whitespace-nowrap text-left">特徴</span>10代〜20代の若い世代に圧倒的な人気。有名雑誌のモデルオーディションなど、夢を叶えるためのイベントが豊富です。</p>
+                                                <p className="text-[11px] text-gray-600 leading-relaxed text-justify text-left"><span className="bg-amber-100 text-amber-600 text-[10px] px-1.5 py-0.5 rounded font-bold mr-1.5 whitespace-nowrap text-left">こんな人におすすめ</span>同世代のファンを増やしたい人、モデルやアイドルなど明確な夢がある人。</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-6">
+                                        <h4 className="font-bold text-sm text-indigo-500 mb-6">新しい自分に変身！「顔出ししないアプリ」</h4>
+                                        
+                                        <div className="space-y-6">
+                                            <div className="flex gap-4 items-start text-left">
+                                                <img src="IRIAM.png" alt="IRIAMアイコン" className="w-12 h-12 rounded-xl object-cover shrink-0 border border-gray-100 shadow-sm bg-white" />
+                                                <div className="text-left">
+                                                    <h5 className="font-bold text-[14px] text-gray-800 mb-1 text-left">IRIAM（イリアム）</h5>
+                                                    <div className="space-y-2 text-left">
+                                                        <p className="text-[11px] text-gray-600 leading-relaxed text-justify text-left"><span className="bg-purple-100 text-purple-600 text-[10px] px-1.5 py-0.5 rounded font-bold mr-1.5 whitespace-nowrap text-left">特徴</span>用意したイラスト1枚が自分の動きに合わせて動く、Vライバー（バーチャルライバー）特化型のアプリです。</p>
+                                                        <p className="text-[11px] text-gray-600 leading-relaxed text-justify text-left"><span className="bg-purple-100 text-purple-600 text-[10px] px-1.5 py-0.5 rounded font-bold mr-1.5 whitespace-nowrap text-left">こんな人におすすめ</span>外見ではなく声やトークで勝負したい人、プライバシーを重視しながらキャラクターになりきりたい人。</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex gap-4 items-start text-left">
+                                                <img src="REALITY.png" alt="REALITYアイコン" className="w-12 h-12 rounded-xl object-cover shrink-0 border border-gray-100 shadow-sm bg-white" />
+                                                <div className="text-left">
+                                                    <h5 className="font-bold text-[14px] text-gray-800 mb-1 text-left">REALITY（リアリティ）</h5>
+                                                    <div className="space-y-2 text-left">
+                                                        <p className="text-[11px] text-gray-600 leading-relaxed text-justify text-left"><span className="bg-fuchsia-100 text-fuchsia-600 text-[10px] px-1.5 py-0.5 rounded font-bold mr-1.5 whitespace-nowrap text-left">特徴</span>スマホ1台で簡単に高品質な3Dアバターを作成して配信できます。ライバー同士のコラボ配信やゲーム機能が豊富です。</p>
+                                                        <p className="text-[11px] text-gray-600 leading-relaxed text-justify text-left"><span className="bg-fuchsia-100 text-fuchsia-600 text-[10px] px-1.5 py-0.5 rounded font-bold mr-1.5 whitespace-nowrap text-left">こんな人におすすめ</span>自分好みのアバターを作ってみたい人、他の配信者とワイワイ交流しながら配信したい人。</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex gap-4 items-start text-left">
+                                                <img src="mirrativ.png" alt="Mirrativアイコン" className="w-12 h-12 rounded-xl object-cover shrink-0 border border-gray-100 shadow-sm bg-white" />
+                                                <div className="text-left">
+                                                    <h5 className="font-bold text-[14px] text-gray-800 mb-1 text-left">Mirrativ（ミラティブ）</h5>
+                                                    <div className="space-y-2 text-left">
+                                                        <p className="text-[11px] text-gray-600 leading-relaxed text-justify text-left"><span className="bg-emerald-100 text-emerald-600 text-[10px] px-1.5 py-0.5 rounded font-bold mr-1.5 whitespace-nowrap text-left">特徴</span>スマホゲームのプレイ画面を簡単に配信できるゲーム実況に特化したアプリ。「エモモ」というオリジナル3Dアバターも使用できます。</p>
+                                                        <p className="text-[11px] text-gray-600 leading-relaxed text-justify text-left"><span className="bg-emerald-100 text-emerald-600 text-[10px] px-1.5 py-0.5 rounded font-bold mr-1.5 whitespace-nowrap text-left">こんな人におすすめ</span>ゲームが大好きな人、ゲーム仲間を見つけながら楽しく配信したい人。</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex gap-4 items-start text-left">
+                                                <img src="Spoon.png" alt="Spoonアイコン" className="w-12 h-12 rounded-xl object-cover shrink-0 border border-gray-100 shadow-sm bg-white" />
+                                                <div className="text-left">
+                                                    <h5 className="font-bold text-[14px] text-gray-800 mb-1 text-left">Spoon（スプーン）</h5>
+                                                    <div className="space-y-2 text-left">
+                                                        <p className="text-[11px] text-gray-600 leading-relaxed text-justify text-left"><span className="bg-orange-100 text-orange-600 text-[10px] px-1.5 py-0.5 rounded font-bold mr-1.5 whitespace-nowrap text-left">特徴</span>音声配信に特化した「ラジオ配信」アプリ。雑談、歌ってみた、ASMR、寝落ち配信など、声の魅力を最大限に活かせます。</p>
+                                                        <p className="text-[11px] text-gray-600 leading-relaxed text-justify text-left"><span className="bg-orange-100 text-orange-600 text-[10px] px-1.5 py-0.5 rounded font-bold mr-1.5 whitespace-nowrap text-left">こんな人におすすめ</span>声に自信がある人、顔出しやアバター作成の手間なく、気軽に声だけで繋がりを作りたい人。</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+                // Page 4: 実績
+                { 
+                    title: "どのくらい稼げるの？", 
+                    subtitle: "ライバーのタイプ別・収益シミュレーション！", 
+                    color: "from-purple-600 to-indigo-400", 
+                    content: (
+                        <div className="space-y-6 page-transition pb-8 text-left">
+                            <div className="px-2">
+                                <p className="text-gray-700 text-[12px] leading-relaxed text-justify mb-4">
+                                    ライブ配信の収益は、「配信にどれくらい時間をかけるか」「どんな風にファンと交流するか」によって大きく変わります。<br/>
+                                    「自分ならどのタイプに近いかな？」と想像しながら、未経験からスタートした3名の成功事例を見てみましょう！
+                                </p>
+                            </div>
+
+                            <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 overflow-hidden relative">
+                                <div className="flex justify-between items-start mb-3">
+                                    <span className="bg-pink-100 text-pink-600 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">Case 1：会社にナイショで「自分へのご褒美」！</span>
+                                </div>
+                                <h5 className="font-bold text-sm text-gray-800 mb-2">都内在住・事務職のYさん（20代）</h5>
+
+                                <div className="mt-4 mb-4 overflow-hidden shadow-md">
+                                     <img 
+                                        src="Yさん.png" 
+                                        alt="ライバーの収益" 
+                                        className="w-full h-auto object-cover" 
+                                        />
+                                </div>
+
+                                <div className="space-y-1 mb-3 text-[11px] text-gray-600">
+                                    <p><span className="font-bold text-gray-800 mr-1">配信スタイル：</span>週4〜5日 / 仕事終わりの 22:00〜24:00</p>
+                                    <p><span className="font-bold text-gray-800 mr-1">配信内容：</span>お酒を飲みながらの「晩酌配信」</p>
+                                </div>
+                                <div className="mb-3 text-right">
+                                    <div className="flex items-baseline justify-end gap-2">
+                                        <span className="text-[10px] text-gray-400">配信収益</span>
+                                        <span className="text-2xl font-bold text-pink-500">月320,000円</span>
+                                    </div>
+                                </div>
+                                <div className="mt-4">
+                                    <p className="text-[10px] font-bold text-pink-500 mb-1">Yさんの声</p>
+                                    <p className="text-[11px] text-gray-600 leading-relaxed italic border-l-2 border-pink-200 pl-3 text-justify">
+                                        「以前はコンビニ飯で済ませていましたが、配信を始めてからはデパ地下のお惣菜や、回らないお寿司を気軽に選べるようになりました！セキュリティのしっかりしたオートロック付きマンションに引っ越して、大好きなデパコスやブランドバッグも我慢せずに買えています。そろそろ配信一本に専念しようか本気で検討中です！」
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 overflow-hidden relative">
+                                <div className="flex justify-between items-start mb-3">
+                                    <span className="bg-emerald-100 text-emerald-600 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">Case 2：子育てしながら「自立したママ」へ！</span>
+                                </div>
+                                <h5 className="font-bold text-sm text-gray-800 mb-2">2児の母・専業主婦のMさん（30代）</h5>
+                                
+                                <div className="mt-4 mb-4 overflow-hidden shadow-md">
+                                     <img 
+                                        src="Mさん.png" 
+                                        alt="ライバーの収益" 
+                                        className="w-full h-auto object-cover" 
+                                        />
+                                </div>
+
+                                <div className="space-y-1 mb-3 text-[11px] text-gray-600">
+                                    <p><span className="font-bold text-gray-800 mr-1">配信スタイル：</span>毎日 / 子供のお昼寝中 ＆ 寝かしつけ後の 23:00〜25:00</p>
+                                    <p><span className="font-bold text-gray-800 mr-1">配信内容：</span>ママ友には言えないお悩み相談 ＆ 雑談</p>
+                                </div>
+                                <div className="mb-3 text-right">
+                                    <div className="flex items-baseline justify-end gap-2">
+                                        <span className="text-[10px] text-gray-400">配信収益</span>
+                                        <span className="text-2xl font-bold text-emerald-500">月230,000円</span>
+                                    </div>
+                                </div>
+                                <div className="mt-4">
+                                    <p className="text-[10px] font-bold text-emerald-500 mb-1">Mさんの声</p>
+                                    <p className="text-[11px] text-gray-600 leading-relaxed italic border-l-2 border-emerald-200 pl-3 text-justify">
+                                        「一番変わったのは、『これ買っていい？』と旦那さんの顔色を伺うことがなくなったことです！子供をやりたがっていた習い事に通わせたり、長期休みには家族旅行をプレゼントしたり。何より、配信を通じて『ママ』としてではなく『一人の女性』として褒めてもらえることが、毎日の心の支えになっています。」
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 overflow-hidden relative">
+                                <div className="flex justify-between items-start mb-3">
+                                    <span className="bg-amber-100 text-amber-600 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">Case 3：未経験から「一気にスター」へ！</span>
+                                </div>
+                                <h5 className="font-bold text-sm text-gray-800 mb-2">インフルエンサー志望のHさん（20代）</h5>
+                                
+                                <div className="mt-4 mb-4 overflow-hidden shadow-md">
+                                     <img 
+                                        src="Hさん.png" 
+                                        alt="ライバーの収益" 
+                                        className="w-full h-auto object-cover" 
+                                        />
+                                </div>
+
+                                <div className="space-y-1 mb-3 text-[11px] text-gray-600">
+                                    <p><span className="font-bold text-gray-800 mr-1">配信スタイル：</span>毎日 / 5〜8時間（本気の時は24時間配信も！）</p>
+                                    <p><span className="font-bold text-gray-800 mr-1">配信内容：</span>歌 ＆ 筋トレ ＆ 本気の夢語り</p>
+                                </div>
+                                <div className="mb-3 text-right">
+                                    <div className="flex items-baseline justify-end gap-2">
+                                        <span className="text-[10px] text-gray-400">配信収益</span>
+                                        <span className="text-2xl font-bold text-amber-500">月2,000,000円</span>
+                                    </div>
+                                </div>
+                                <div className="mt-4">
+                                    <p className="text-[10px] font-bold text-amber-500 mb-1">Hさんの声</p>
+                                    <p className="text-[11px] text-gray-600 leading-relaxed italic border-l-2 border-amber-200 pl-3 text-justify">
+                                        「イベントで入賞して渋谷の巨大ビジョンに掲載されてから、SNSのフォロワーが激増！企業からの案件オファーも届き始めました。配信時間は長いですが、大学の同期と比べても圧倒的に稼げているので、今はとにかく配信が楽しいです。大抵のものは値段を気にせず買えるようになって、まさに人生が180度激変しました！」
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="pt-4">
+                                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 rounded-xl border border-indigo-100 shadow-md text-center overflow-hidden">
+                                    <div className="flex justify-center h-20 items-center mb-3 mt-1">
+                                        <img src="ONECARAT_Liver management production.png" alt="ONECARAT LIVER MANAGEMENT PRODUCTION" className="h-20 w-auto object-contain scale-[1.4]" />
+                                    </div>
+
+                                    <h4 className="font-bold text-[14px] text-indigo-900 mb-3 leading-snug">所属ライバーの圧倒的な実績</h4>
+                                    <div className="mb-4 mt-2 flex justify-center items-center">
+                                        <img src="ONECARAT_top.png" alt="ONECARAT実績" className="w-full h-auto shadow-sm object-contain block" />
+                                    </div>
+
+                                    <p className="text-[11px] text-gray-700 leading-relaxed text-justify mb-1">
+                                        「本当に未経験からそんなに稼げるの？」と思うかもしれませんが、ONECARATでは多くのライバーがゼロから結果を出しています。業界トップクラスのノウハウとサポート体制があるからこそ、個人で活動するよりも確実なステップアップが可能になります。
+                                        <br/>
+                                        <br/>
+                                        トップライバーだけでなく、継続して活動する方の「平均月収（3ヶ月継続活動）」が高いことも、ONECARATの強みです。
+                                    </p>
+
+                                    <p className="text-[10px] text-gray-600 leading-relaxed text-justify mt-1">
+                                        <br/>
+                                        ※記載されている収益実績や成功事例は個人の結果であり、すべての方に同様の収益や人気を保証するものではありません。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+                // Page 5: FAQ
+                { title: "よくある疑問を解消！", subtitle: "不安を解消して安心してスタートしよう！", color: "from-sky-500 to-blue-400", content: (
+                    <div className="space-y-4 page-transition text-left pb-8">
+                        {[
+                            { q: "未経験でも本当に稼げるようになりますか？", a: "はい、可能です。最初は数千円〜数万円からのスタートになることが多いですが、継続することで少しずつファンが増え、数ヶ月で会社員の給料を超える人もたくさんいます。" },
+                            { q: "うまくいく人と、そうでない人の違いは何ですか？", a: "最大の違いは「継続」です。特別なトークスキルや才能よりも、毎日少しずつでもコツコツと配信を続け、リスナーさんとの信頼関係を築ける人が最終的に大きなファンを掴んでいます。" },
+                            { q: "投げ銭（ギフト）をねだるのが恥ずかしい・申し訳ない気がします。", a: "無理にねだる必要はまったくありません。ギフトは、リスナーさんが「配信を盛り上げたい」「ライバーを応援したい」という純粋な気持ちで贈ってくれるものです。恥ずかしがらず、笑顔で「ありがとう！」と受け取る姿勢が一番喜ばれます。" },
+                            { q: "見た目やトークに自信がありません。何を話せばいいですか？", a: "ありのままで大丈夫です！ 配信アプリには高性能な美顔フィルターがあり、すっぴんでも綺麗に映ることができます。また、際立ったトーク力よりも、「今日食べたもの」や「最近の悩み」といった普通の雑談をしながら、リスナーさんのコメントに親身に反応する「キャッチボール」の姿勢が何より大切です。" },
+                            { q: "会社員や主婦でも両立できますか？ 1日はどのくらい配信すればいいですか？", a: "もちろんです。自分のライフスタイルに合わせて活動できます。ONECARATでも所属ライバーの約7割が本業や家事と両立しています。1回1〜2時間の配信が一般的ですが、通勤時間や家事の合間など、スキマ時間を活用して複数回に分けて配信する人もいます。" },
+                            { q: "配信するおすすめの時間はありますか？", a: "20時〜24時が「ゴールデンタイム」です。この時間帯はアプリを開くリスナーさんが一番多くなります。ただ、あえてライバルが少ない朝や昼に配信し、通勤・お昼休みの層を狙ってファンを獲得するのも有効な戦略です。" },
+                            { q: "必要な機材や初期費用はかかりますか？ 部屋が狭くても大丈夫ですか？", a: "今お持ちのスマホ1台で、無料で今すぐ始められます。部屋の背景はアプリの「背景機能」を使ったり、カメラに映る範囲だけを可愛い壁紙で整えたりすればOKです。より綺麗に映りたい場合は、数千円のリングライトを1つ用意するだけで十分な環境が整います。" },
+                            { q: "家族や友達、会社に内緒で始められますか？身バレが心配です。", a: "本名ではなく「ニックネーム」で活動できるため、極力バレずに配信が可能です。アプリ内には特定のユーザーをブロックする機能や、AIと運営スタッフによる24時間監視体制、通報窓口などが整っています。個人情報の扱い（家の窓の景色や制服を映さないなど）にさえ気をつければ、リスクは最小限に抑えられます。" },
+                            { q: "確定申告や税金の手続きが難しそうで不安です。", a: "配信での所得が年間一定額を超えると確定申告が必要になります。「難しそう」と感じるかもしれませんが、事務所に所属していれば、税金周りのサポートや税理士さんへの無料相談を活用できるため安心です。" },
+                            { q: "ライバー事務所には所属した方がいいですか？", a: "本気で稼ぎたい・人気になりたいなら、事務所への所属を強くおすすめします。個人（フリー）で活動するよりも有利な報酬還元率や、独自のキャンペーンが適用されるケースが多いほか、プロのマネージャーからの配信ノウハウの提供、トラブル時のサポート、企業案件やメディア出演のチャンスなど、最短距離で成功するためのバックアップを受けることができます。" }
+                        ].map((faq, index) => (
+                            <div key={index} className="bg-white p-4 rounded-xl shadow-sm border border-blue-50 text-left">
+                                <h4 className="font-bold text-xs text-blue-700 flex gap-2 text-left"><span className="text-blue-300 font-bold text-left">Q.</span> {faq.q}</h4>
+                                <div className="mt-2 pl-6 relative text-left">
+                                    <div className="absolute left-1 top-0 text-blue-200 text-xs font-bold italic text-left">A.</div>
+                                    <p className="text-[11px] text-gray-600 leading-relaxed text-justify text-left">{faq.a}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) },
+                // Page 6: 配信の始め方3ステップ
+                { 
+                    title: "配信の始め方3ステップ", 
+                    subtitle: "しっかり準備して挑戦しよう！", 
+                    color: "from-orange-500 to-amber-400", 
+                    content: (
+                        <div className="space-y-5 page-transition pb-3 text-left">
+                            {/* Step 1 */}
+                            <div className="bg-white p-5 rounded-xl shadow-sm border border-orange-100 text-left">
+                                <h4 className="font-bold text-[14px] text-orange-600 mb-4 flex items-center gap-2 text-left">
+                                    <span className="bg-orange-100 text-orange-600 w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0 font-bold">1</span>
+                                    自分に合った配信アプリを選ぶ
+                                </h4>
+                                <div className="space-y-4 text-left">
+                                    <div className="text-left">
+                                        <p className="text-[12px] font-bold text-gray-800 mb-1 text-left">顔出しか、顔出しなしか</p>
+                                        <p className="text-[11px] text-gray-600 leading-relaxed text-justify text-left pl-2 border-l-2 border-orange-100">リアルな表情やリアクションで勝負するなら「顔出しアプリ」、身バレを防ぎつつ声やキャラクターで勝負するなら「顔出ししないアプリ」を選びましょう。</p>
+                                    </div>
+                                    <div className="text-left">
+                                        <p className="text-[12px] font-bold text-gray-800 mb-1 text-left">目的・生活スタイルに合わせる</p>
+                                        <p className="text-[11px] text-gray-600 leading-relaxed text-justify text-left pl-2 border-l-2 border-orange-100">「安定して稼ぎたい」「インフルエンサーとして有名になりたい」「スキマ時間でゆるくやりたい」など、自分の目標に合わせて、前述の『代表アプリ編』を参考に一番合いそうなアプリの目星をつけてみましょう。</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Step 2 */}
+                            <div className="bg-white p-5 rounded-xl shadow-sm border border-amber-100 text-left">
+                                <h4 className="font-bold text-[14px] text-amber-600 mb-4 flex items-center gap-2 text-left">
+                                    <span className="bg-amber-100 text-amber-600 w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0 font-bold">2</span>
+                                    配信環境を整える
+                                </h4>
+                                <div className="space-y-4 text-left">
+                                    <div className="text-left">
+                                        <p className="text-[12px] font-bold text-gray-800 mb-1 text-left">安定したWi-Fi環境</p>
+                                        <p className="text-[11px] text-gray-600 leading-relaxed text-justify text-left pl-2 border-l-2 border-amber-100">ライブ配信はデータ通信量が多くなるため、途切れない安定したWi-Fi環境が必須です。</p>
+                                    </div>
+                                    <div className="text-left">
+                                        <p className="text-[12px] font-bold text-gray-800 mb-1 text-left">明るい照明</p>
+                                        <p className="text-[11px] text-gray-600 leading-relaxed text-justify text-left pl-2 border-l-2 border-amber-100">窓際で自然光を取り入れるか、数千円のリングライト（Amazon等で2,000円〜）を1つ用意するだけで、肌の映りや表情の明るさが劇的に良くなります。</p>
+                                    </div>
+                                    <div className="text-left">
+                                        <p className="text-[12px] font-bold text-gray-800 mb-1 text-left">シンプルな背景</p>
+                                        <p className="text-[11px] text-gray-600 leading-relaxed text-justify text-left pl-2 border-l-2 border-amber-100">豪華な部屋である必要は全くありません。白い壁やカーテンなど、清潔感のあるスッキリとした背景がおすすめです。</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Step 3 */}
+                            <div className="bg-white p-5 rounded-xl shadow-sm border border-yellow-200 text-left">
+                                <h4 className="font-bold text-[14px] text-yellow-600 mb-4 flex items-center gap-2 text-left">
+                                    <span className="bg-yellow-100 text-yellow-600 w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0 font-bold">3</span>
+                                    プロフィールと最初のトークを準備する
+                                </h4>
+                                <div className="space-y-4 text-left">
+                                    <div className="text-left">
+                                        <p className="text-[12px] font-bold text-gray-800 mb-1 text-left">ライバー名とアイコンを設定する</p>
+                                        <p className="text-[11px] text-gray-600 leading-relaxed text-justify text-left pl-2 border-l-2 border-yellow-200">アプリ内で使う親しみやすいニックネーム（活動名）を決めましょう。アイコンはあなたの「顔」になるので、とびきり笑顔の写真や魅力的なイラストを設定するのがおすすめです。</p>
+                                    </div>
+                                    <div className="text-left">
+                                        <p className="text-[12px] font-bold text-gray-800 mb-1 text-left">プロフィールを作り込む</p>
+                                        <p className="text-[11px] text-gray-600 leading-relaxed text-justify text-left pl-2 border-l-2 border-yellow-200">趣味や好きな食べ物、普段の配信時間帯などをプロフィール欄に書いておくと、初見のリスナーさんとの共通の話題になりやすいです。</p>
+                                    </div>
+                                    <div className="text-left">
+                                        <p className="text-[12px] font-bold text-gray-800 mb-1 text-left">最初の15分のフリートーク</p>
+                                        <p ref={triggerRef} className="text-[11px] text-gray-600 leading-relaxed text-justify pl-2 border-l-2 border-yellow-200">
+                                            「ライバー名とアイコンを設定する最近あった小さなニュース」や「配信を始めたきっかけ」など、簡単なネタで十分です。リスナーさんが入室してくれたら、「初めまして！」「こんにちは！」と笑顔で挨拶するだけで自然と会話は繋がっていきます。
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="h-1">
+                            </div>
+                        </div>
+                    )
+                }
+            ];
+
+            const page = pages[currentPage];
+            const handleTap = (e) => {
+                // 画面に触れた瞬間にミュートを解除して音を出す
+                if (videoRef.current) {
+                    videoRef.current.play().catch(() => {});
+                }
+                // 2. タップ位置の計算
+                const rect = e.currentTarget.getBoundingClientRect();
+                const tapX = e.clientX - rect.left;
+                
+                // 3. ページ移動の実行
+                if (tapX < rect.width * 0.3) {
+                    // 左側30%タップで戻る
+                    setCurrentPage(prev => Math.max(0, prev - 1));
+                } else if (currentPage < pages.length - 1) {
+                    // それ以外で次へ進む
+                    setCurrentPage(prev => prev + 1);
+                }
+            };
+
+            return (
+                <div className="min-h-screen flex items-center justify-center text-left">
+                    <div className="relative w-full max-w-[430px] phone-container bg-white shadow-2xl flex flex-col sm:rounded-xl overflow-hidden sm:my-4 cursor-pointer text-left" onClick={handleTap}>
+                        {currentPage > 0 && <div className="progress-container text-left">{pages.map((_, i) => i > 0 && (<div key={i} className="progress-bar text-left"><div className="progress-fill text-left" style={{ width: i <= currentPage ? '100%' : '0%' }} /></div>))}</div>}
+                        <div className={`${page.isCover ? 'flex-1' : 'pt-8 pb-4 px-8 bg-gradient-to-br'} ${page.color} relative transition-all duration-500 flex flex-col text-left`}>
+                            {!page.isCover && <div className="page-transition text-white text-left"><h1 className="text-2xl font-bold leading-tight mb-1 drop-shadow-lg text-left">{page.title}</h1><p className="text-[12px] font-bold opacity-90 italic leading-snug whitespace-pre-line border-l-4 border-white/30 pl-3 text-left">{page.subtitle}</p></div>}
+                            {page.isCover && page.content}
+                        </div>
+                        {!page.isCover && (
+                            <div 
+                                ref={scrollContainerRef} 
+                                onScroll={handleScroll}
+                                className="flex-1 overflow-y-auto px-8 pt-4 pb-20 bg-white custom-scrollbar text-left"
+                            >
+                                {page.content}
+                            </div>
+                        )}
+
+                        {/* --- ポップアップセクション --- */}
+                        {showFinalPopup && (
+                            <div 
+                                className="absolute inset-x-0 bottom-0 z-[100] bg-white shadow-[0_-10px_40px_rgba(0,0,0,0.15)] rounded-t-[2rem] animate-slide-up border-t border-gray-100 overflow-hidden"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <div className="p-1 text-center bg-rose-500">
+                                    <div className="w-10 h-1 bg-white/40 rounded-full mx-auto my-1"></div>
+                                </div>
+                                <div className="p-6 pt-5 custom-scrollbar max-h-[75vh] overflow-y-auto">
+                                    <div className="mb-6 text-center">
+                                        <h3 className="text-rose-600 font-bold text-[17px] leading-tight">
+                                            🚨最重要🚨<br/>
+                                            <span className="inline-block whitespace-nowrap mt-1">いきなり「配信スタート」はちょっと待って！</span>
+                                        </h3>
+                                    </div>
+                                    <div className="text-[12px] text-gray-700 leading-relaxed text-justify mb-6 space-y-4">
+                                        <p>実は、多くのライブ配信アプリには<span className="font-bold text-rose-600 underline decoration-rose-200 decoration-2">「初心者を優遇する制度（ビギナー枠など）」が存在します。これは、始めたての一定期間だけ、アプリ側があなたの配信を優先的におすすめ表示してくれる“ボーナタイム”</span>です。</p>
+                                        <p>事前の知識がないまま「なんとなく」でスタートしてしまうと、この最もファンを獲得しやすい貴重なチャンスを無駄にしてしまう可能性が非常に高いのです。まずはライバー事務所に相談し、選んだアプリが本当にあなたに最適か答え合わせをし、戦略的なデビューのタイミングを整えることが成功への一番の近道です。</p>
+                                    </div>
+
+                                    <div className="bg-green-50 rounded-xl p-5 border border-green-100 shadow-sm">
+                                        <h4 className="text-green-700 font-bold text-sm mb-3 flex items-center justify-center gap-2 text-center">
+                                            <span>🎁 ライブ配信についてもっと知りたい方へ</span>
+                                        </h4>
+                                        <p className="text-[11px] text-gray-600 leading-relaxed mb-5 text-justify text-left">
+                                            「もっと詳しく話を聞いてみたい！」「安心・安全に、最短で収益化を目指したい！」という方は、ぜひONECARATの公式LINEまでお気軽にお問い合わせください！<br/>
+                                            <br/>専門のスタッフが、あなたの目標やライフスタイルに合わせた最適な配信プランを無料でアドバイスさせていただきます。まずは一緒に、どう進めるのがベストか検討してみましょう！
+                                        </p>
+                                        <a href={LINE_URL} className="relative overflow-hidden w-full bg-[#06C755] text-white py-4 px-4 rounded-xl shadow-xl flex items-center justify-center gap-4 transition-transform active:scale-95 text-left">
+                                            {/* シマー（光るスパン）効果 */}
+                                            <div className="absolute top-0 left-0 w-1/3 h-full bg-gradient-to-r from-transparent via-white/50 to-transparent animate-shimmer" style={{ pointerEvents: 'none' }}></div>
+                                            <Icon name="MessageCircle" size={24} color="white" fill="white" />
+                                            <span className="font-bold text-[15px] relative z-10">公式LINEで無料相談する</span>
+                                        </a>
+                                    </div>
+                                    
+                                    <div className="mt-8 mb-6 relative text-center">
+                                        {/* キャラクター画像を配置。枠線の上に重なるように */}
+                                        <img 
+                                            src="コスモくん.png" /* キャラクターの画像ファイル名 */
+                                            alt="コスモくん" 
+                                            className="absolute bottom-[-15px] left-[-5px] h-[130px] w-auto object-contain z-[110] transform transition-transform hover:scale-105"
+                                            style={{ pointerEvents: 'none' }} /* 画像がボタン操作を邪魔しないように */
+                                        />
+                                        
+                                        {/* 「とじる」ボタン */}
+                                        <button 
+                                            onClick={() => {
+                                                setShowFinalPopup(false);
+                                                setPopupDismissed(true); // ポップアップを閉じたことを記録
+                                            }}
+                                            className="w-full text-gray-400 text-[10px] font-bold hover:text-gray-600 py-3 text-center transition-colors"
+                                        >
+                                            とじる
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {!page.isCover && !showFinalPopup && (
+                            <div className="absolute bottom-5 left-6 right-6 z-50 flex justify-center">
+                                <a 
+                                    href={LINE_URL} 
+                                    onClick={(e) => e.stopPropagation()} 
+                                    className="w-full bg-[#06C755] text-white py-4 px-6 rounded-xl shadow-[0_10px_30px_-5px_rgba(6,199,85,0.5)] flex items-center justify-between sticky-banner-active overflow-hidden relative border-none"
+                                >
+                                    {/* シマー効果 */}
+                                    <div className="absolute top-0 left-0 w-1/3 h-full bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" style={{ pointerEvents: 'none' }}></div>
+                                    
+                                    {/* 左側：LINEアイコンとテキスト */}
+                                    <div className="flex items-center gap-3 relative z-10">
+                                        {/* 背景(bg-xxx)を削除しました */}
+                                        <div className="flex items-center justify-center">
+                                            <Icon name="MessageCircle" size={24} color="white" fill="white" />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-[14px] font-bold tracking-tight leading-tight">ライブ配信するならONECARAT！</span>
+                                            <span className="text-[10px] opacity-90 font-bold tracking-wide">公式LINEでお問い合わせ</span>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* 右側：矢印アイコン。こちらも背景を削除しました */}
+                                    <div className="relative z-10 flex items-center justify-center">
+                                        <Icon name="ChevronRight" size={20} color="white" />
+                                    </div>
+                                </a>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
