@@ -170,8 +170,14 @@
         const USERS = ["rina_08", "m_chan", "yuki_22", "ken_ken", "misa_misa", "night_sky", "takaaki_sea", "daiki", "sora", "nana_77", "michel", "kenta_33"];
         const TEXTS = ["ライバー事務所探してました！ ✨", "憧れる！配信したい！ 😍", "ONCARATすごそう 💎", "夢があるなぁ… 🌈", "ライバー募集してるの？ 🤔", "初心者だけど大丈夫かな？ 🔰", "稼ぎたい！ 💰", "ライブ配信について知りたい！ 📱", "どんな世界なんだろ？ ✨", "人気になれるかな… 😖"];
         const COMMENT_COLORS = ["text-rose-500", "text-amber-500", "text-sky-500", "text-emerald-500", "text-orange-500", "text-purple-500", "text-pink-500"];
-        const HEART_COLORS = ["text-rose-400", "text-pink-400", "text-red-400", "text-orange-400", "text-yellow-400", "text-purple-400", "text-sky-400", "text-emerald-400"];
-
+        const HEART_COLORS = [
+            "#ff7eb9", // ロゴのメインピンク
+            "#ff9a9e", // パステルピンク
+            "#f5d0fe", // ライトパープル
+            "#4facfe", // スカイブルー
+            "#43e97b", // エメラルドグリーン
+            "#fff381"  // ネオンイエロー
+        ];
         const OnecaratFallbackLogo = ({ size = 20 }) => (
             <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M6 3L3 8L12 22L21 8L18 3H6Z" fill="#7ed7d1" />
@@ -185,7 +191,44 @@
                 MessageCircle: <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>,
                 UserCircle: <><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"/></>,
                 TrendingUp: <><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></>,
-                Heart: <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>,
+                // --- 変更後：Iconコンポーネント内のHeart部分 ---
+                // --- Iconコンポーネント内のHeart部分 ---
+            Heart: (
+                <>
+                    <defs>
+                        {/* --- 立体感とツヤ感を出すためのフィルター定義 --- */}
+                        <filter id="heartGlow" x="-20%" y="-20%" width="140%" height="140%">
+                            {/* 1. 影（ドロップシャドウ）で少し浮いた感じを出す */}
+                            <feDropShadow dx="0.5" dy="1.5" stdDeviation="1.2" floodColor="#000" floodOpacity="0.2"/>
+                            
+                            {/* 2. 光の反射（スペキュラライト）でツヤを作る */}
+                            <feSpecularLighting surfaceScale="5" specularConstant="1" specularExponent="20" lightingColor="#fff" in="SourceGraphic" result="specOut">
+                                {/* 光源の位置（左上から当てる） */}
+                                <fePointLight x="-50" y="-100" z="200"/>
+                            </feSpecularLighting>
+                            
+                            {/* 3. 反射光と元のハートを合成する */}
+                            <feComposite in="specOut" in2="SourceGraphic" operator="in" result="specChar"/>
+                            <feComposite in="SourceGraphic" in2="specChar" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="litGradient"/>
+                            
+                            {/* 4. 最後に全体を少し滑らかにする（オプション） */}
+                            <feGaussianBlur in="litGradient" stdDeviation="0.3" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    
+                    {/* --- ハートのパス --- */}
+                    <path 
+                        d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" 
+                        fill={fill} // App側から渡された単色（例：#ff7eb9）
+                        stroke="none"
+                        filter="url(#heartGlow)" // 上で定義したフィルターを適用
+                    />
+                </>
+            ),
                 ChevronRight: <polyline points="9 18 15 12 9 6"/>,
                 ChevronLeft: <polyline points="15 18 9 12 15 6"/>,
                 Camera: <><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></>,
@@ -277,11 +320,14 @@
                 return { user: selectedUser, text, color: COMMENT_COLORS[Math.floor(Math.random() * COMMENT_COLORS.length)], id: Math.random() };
             };
 
+            // generateHeart 関数内
+            // generateHeart 関数内
             const generateHeart = () => ({
                 id: Math.random(),
                 x: Math.random() * 30 - 15,
                 tilt: Math.random() * 80 - 40,
-                color: HEART_COLORS[Math.floor(Math.random() * HEART_COLORS.length)],
+                // IDの代わりにカラーコードをランダムに取得
+                color: HEART_COLORS[Math.floor(Math.random() * HEART_COLORS.length)], 
                 delay: Math.random() * 0.1,
                 duration: 2.2 + Math.random() * 1.5 
             });
@@ -344,12 +390,13 @@
                         />
                     </div>
 
-                    {/* 中央ロゴ：高さを mt-20 に抑え、サイズを w-[95%] に微調整して縦方向のスペースを確保 */}
-                    <div className="flex-1 flex flex-col items-center justify-start z-20 px-4 text-center mt-20">
+                    {/* 中央ロゴ：flex-1 で中央エリア全体を確保し、items-center と justify-center で完全に画面中央に配置 */}
+                    <div className="flex-1 flex flex-col items-center justify-center z-20 px-2 mt-8 text-center relative">
+                        {/* 画像を大きく表示：w-[120%] で親要素からはみ出すサイズを指定し、max-w を解除 */}
                         <img 
                             src="Live Streaming Guide.png" 
                             alt="ライブ配信ガイド ロゴ" 
-                            className="w-[100%] max-w-[360px] h-auto object-contain animate-bounce-in" 
+                            className="w-[120%] h-auto object-contain animate-bounce-in relative z-20" 
                             style={{ animationDelay: '0.1s' }}
                         />
                     </div>
@@ -367,10 +414,20 @@
                                     </div>
                                 ))}
                             </div>
+                            {/* ハートの表示エリア */}
                             <div className="relative w-12 h-32 shrink-0 overflow-visible text-left">
                                 {hearts.map((heart) => (
-                                    <div key={heart.id} className={`absolute bottom-0 left-[30%] ${heart.color} animate-heart`} style={{ marginLeft: `${heart.x}px`, animationDelay: `${heart.delay}s`, animationDuration: `${heart.duration}s`, '--tilt': `${heart.tilt}deg` }}>
-                                        <Icon name="Heart" size={28} fill="currentColor" />
+                                    <div 
+                                        key={heart.id} 
+                                        className="absolute bottom-0 left-[30%] animate-heart" 
+                                        style={{ 
+                                            marginLeft: `${heart.x}px`, 
+                                            animationDelay: `${heart.delay}s`, 
+                                            animationDuration: `${heart.duration}s`, 
+                                            '--tilt': `${heart.tilt}deg` 
+                                        }}
+                                    >
+                                        <Icon name="Heart" size={28} fill={heart.color} />
                                     </div>
                                 ))}
                             </div>
@@ -389,7 +446,7 @@
                             </div>
                         </div>
 
-                        <div className="text-center w-full pt-0"><p className="text-gray-400 text-[9px] font-bold tracking-[0.1em] pl-[0.4em] text-center">Produce by ONECARAT</p></div>
+                        <div className="text-center w-full pt-0"><p className="text-white text-[9px] font-bold tracking-[0.1em] pl-[0.4em] text-center">Produce by ONECARAT</p></div>
                     </div>
                 </div>
             )
